@@ -32,4 +32,5 @@ class RedisClient {
   }
 }
 
-module.exports = RedisClient;
+export const redisClient = RedisClient();
+export default RedisClient;
