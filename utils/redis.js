@@ -1,12 +1,17 @@
 /* eslint-disable linebreak-style */
 import { createClient } from 'redis';
+import { promisify } from 'util';
 
 class RedisClient {
   constructor() {
     this.client = createClient()
       .on('error', (err) => {
-        console.log(err);
+        console.log(`Failed to connect: ${err}`);
       });
+
+    this.getAsync = promisify(this.client.get).bind(this.client);
+    this.setexAsync = promisify(this.client.setex).bind(this.client);
+    this.delAsync = promisify(this.client.del).bind(this.client);
   }
 
   isAlive() {
@@ -14,36 +19,16 @@ class RedisClient {
   }
 
   async get(key) {
-    return new Promise((resolve, reject) => {
-      this.client.get(key, (err, value) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(value);
-      });
-    });
+    const result = await this.getAsync(key);
+    return result;
   }
 
   async set(key, value, duration) {
-    return new Promise((resolve, reject) => {
-      this.client.setext(key, duration, value, (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(result);
-      });
-    });
+    await this.setexAsync(key, duration, value);
   }
 
   async del(key) {
-    return new Promise((resolve, reject) => {
-      this.client.del(key, (err, result) => {
-        if (err) {
-          reject(err);
-        }
-        reject(result);
-      });
-    });
+    await this.delAsync(key);
   }
 }
 
