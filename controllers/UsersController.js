@@ -15,13 +15,13 @@ class UsersController {
       res.end();
     }
 
-    const existingUser = await dbClient.userExixt(email);
+    const existingUser = await dbClient.find(email);
     if (existingUser) {
       res.status(400).json({ error: 'Already exist' });
       res.end();
     }
 
-    const user = await dbClient.createUser(email, password);
+    const user = await dbClient.insertOne(email, password);
     const id = `${user.insertedID}`;
     req.status(201).json({ id, email });
     res.end();
