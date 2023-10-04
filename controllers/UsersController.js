@@ -1,6 +1,8 @@
 /* eslint-disable linebreak-style */
 import dbClient from '../utils/db';
 
+const { SHA1 } = require('sha1');
+
 class UsersController {
   static async postNew(req, res) {
     const { email, password } = req.body;
@@ -15,13 +17,17 @@ class UsersController {
       res.end();
     }
 
-    const existingUser = await dbClient.find(email);
+    const db = dbClient.db(dbClient.database);
+    const users = db.collection('users');
+    const existingUser = await users.findOne(email);
+
     if (existingUser) {
       res.status(400).json({ error: 'Already exist' });
       res.end();
     }
 
-    const user = await dbClient.insertOne(email, password);
+    const hashedPassword = SHA1(password).toString();
+    const user = await users.createUser(email, hashedPassword);
     const id = `${user.insertedID}`;
     req.status(201).json({ id, email });
     res.end();
