@@ -6,8 +6,7 @@ const { SHA1 } = require('sha1');
 
 class UsersController {
   static async postNew(req, res) {
-    const email = req.body ? req.body.email : null;
-    const password = req.body ? req.body.password : null;
+    const { email, password } = req.body;
 
     if (!email) {
       res.status(400).json({ error: 'Missing email' });
